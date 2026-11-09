@@ -30,9 +30,9 @@ del { margin-left: .4rem; }
 .hero-copy > p:last-of-type, .detail-copy > p { line-height: 1.6; color: var(--muted); }
 .hero-copy em { color: #5b6848; }
 .primary, .chat-toggle, .chat-form button { display: inline-flex; align-items: center; gap: .75rem; border: 0; background: var(--green); color: white; padding: .86rem 1.15rem; border-radius: .3rem; font-weight: 650; }
-.hero-art { background: radial-gradient(ellipse at 50% 40%, #e9d9b8, #ab9673); position: relative; display: grid; place-items: center; padding: 1.7rem; }
-.hero-art .art { max-width: 540px; transform: rotate(-8deg); filter: drop-shadow(14px 22px 12px #3a261737); }
-.hero-note, .hero-caption { position: absolute; font-size: .68rem; letter-spacing: .14em; font-weight: 700; }
+.hero-art { background: #ded2bc; position: relative; min-height: 310px; overflow: hidden; }
+.hero-art img { position: absolute; width: 100%; height: 100%; object-fit: cover; object-position: center 43%; }
+.hero-note, .hero-caption { position: absolute; z-index: 1; background: #faf8f3; border-radius: .25rem; padding: .45rem .65rem; font-size: .68rem; letter-spacing: .14em; font-weight: 700; }
 .hero-note { top: 1.25rem; left: 1.25rem; }
 .hero-caption { bottom: 1.25rem; right: 1.25rem; }
 .art { display: block; width: 100%; }
@@ -43,8 +43,12 @@ del { margin-left: .4rem; }
 .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; }
 .product-image { display: grid; place-items: center; position: relative; background: #ede6d7; overflow: hidden; }
 .product-card:nth-child(even) .product-image { background: #e5e5da; }
-.product-card .art { transition: scale .2s; }
-.product-card .product-image:hover .art { scale: 1.04; }
+.catalog-photo { display: block; width: 100%; height: auto; aspect-ratio: 4 / 4.5; object-fit: cover; transition: scale .2s; }
+.product-card .product-image:hover .catalog-photo { scale: 1.04; }
+.detail-image { margin: 0; align-self: start; }
+.detail-image img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.detail-image figcaption { position: absolute; right: .7rem; bottom: .7rem; background: #faf8f3; padding: .3rem .6rem; border-radius: .25rem; font-size: .75rem; }
+.color-preview { width: 72px; background: #ede6d7; border-radius: .3rem; }
 .badge { position: absolute; top: .75rem; left: .75rem; z-index: 1; background: #faf8f3; border-radius: 100px; padding: .3rem .65rem; font-size: .72rem; }
 .card-info { margin: .85rem 0 .55rem; align-items: end; flex-wrap: wrap; gap: .45rem; }
 .swatch { width: 24px; height: 24px; padding: 0; border-radius: 50%; border: 1px solid #0004; background: var(--paint); }
@@ -75,6 +79,7 @@ dd { margin: 0; text-align: right; }
 .chat-panel small { display: block; }
 .chat-log { max-height: min(42vh, 310px); overflow: auto; display: grid; gap: .6rem; }
 .bubble { background: #ebe8dc; padding: .65rem .8rem; border-radius: .65rem; font-size: .9rem; }
+.bubble p { white-space: pre-line; }
 .bubble a { display: block; text-decoration: underline; margin-top: .45rem; }
 .bubble.mine { justify-self: end; background: #dfe6d7; }
 .prompts { margin: .65rem 0; }

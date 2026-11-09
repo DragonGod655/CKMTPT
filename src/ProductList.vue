@@ -1,8 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { products } from './catalog.js'
-import ProductArt from './ProductArt.vue'
+import { products, productPhoto } from './catalog.js'
 import ProductCard from './ProductCard.vue'
 
 const route = useRoute()
@@ -21,8 +20,8 @@ const shown = computed(() => category.value === 'Tất cả' ? products : produc
     </div>
     <div class="hero-art">
       <span class="hero-note">01 / LINEN EDIT</span>
-      <ProductArt shape="shirt" paint="#cdb590" />
-      <span class="hero-caption">SƠ MI LINEN · MÀU KEM</span>
+      <img :src="productPhoto(products[0])" alt="Ảnh minh họa sơ mi sáng màu trên móc" fetchpriority="high">
+      <span class="hero-caption">SƠ MI LINEN · ẢNH MINH HỌA</span>
     </div>
   </section>
   <section class="catalog" aria-labelledby="catalog-title">

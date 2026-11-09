@@ -21,7 +21,15 @@ Mở địa chỉ Vite in ra. Chạy `npm test` để kiểm thử và `npm run 
 4. Mở giỏ, tăng số lượng hoặc xóa dòng. Xóa hết sản phẩm trả tồn khả dụng về 3. Tải lại trang để kiểm tra giỏ hàng được lưu trên trình duyệt.
 5. Mở **Tư vấn phối đồ**, thử **Tìm túi dưới 300k** và bấm liên kết **Túi Canvas**.
 
-Tồn kho là dữ liệu mẫu. Số lượng trong giỏ chỉ giữ tồn trên trình duyệt hiện tại. Chatbot dùng quy tắc mô phỏng, đọc danh mục và tồn khả dụng, chạy với dữ liệu có sẵn. Ứng dụng demo chưa có đặt hàng, thanh toán hoặc cơ sở dữ liệu chung.
+Tồn kho là dữ liệu mẫu. Số lượng trong giỏ chỉ giữ tồn trên trình duyệt hiện tại. Chatbot dùng quy tắc để tra giá, ưu đãi và tồn theo màu hoặc size, gợi ý trang phục trong ngân sách và hiểu câu hỏi tiếp nối về món vừa tư vấn. Ứng dụng demo chưa có đặt hàng, thanh toán hoặc cơ sở dữ liệu chung.
+
+## Nguồn ảnh
+
+Ảnh chụp dùng để minh họa mẫu sản phẩm. Màu và kích cỡ của từng biến thể lấy từ danh mục demo. Ảnh thuộc [giấy phép Pexels](https://www.pexels.com/license/).
+
+- [Sơ mi](https://www.pexels.com/photo/20129409/), [quần ống đứng](https://www.pexels.com/photo/9873425/), [túi canvas](https://www.pexels.com/photo/35685413/), [áo thun](https://www.pexels.com/photo/12039633/)
+- [Quần jeans](https://www.pexels.com/photo/1082528/), [áo khoác denim](https://www.pexels.com/photo/13662420/), [hoodie](https://www.pexels.com/photo/867378/), [áo len](https://www.pexels.com/photo/14111130/)
+- [Sneaker](https://www.pexels.com/photo/1461048/), [mũ](https://www.pexels.com/photo/8550900/), [kính râm](https://www.pexels.com/photo/29538700/)
 
 ## GitHub Actions và GitHub Pages
 

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
-import { products, money, unitPrice } from './catalog.js'
+import { products, money, productPhoto, unitPrice } from './catalog.js'
 import { useCart } from './cart.js'
 import ProductArt from './ProductArt.vue'
 
@@ -38,7 +38,10 @@ function add() {
   <section v-if="product" class="detail">
     <RouterLink :to="{ name: 'catalog' }" class="back">← Bộ sưu tập</RouterLink>
     <div class="detail-grid">
-      <div class="product-image"><ProductArt :shape="product.shape" :paint="preview ?? variant?.color.paint" /></div>
+      <figure class="product-image detail-image">
+        <img :src="productPhoto(product)" :alt="'Ảnh minh họa ' + product.name">
+        <figcaption>Ảnh minh họa</figcaption>
+      </figure>
       <div class="detail-copy">
         <p class="eyebrow">{{ product.category }}</p>
         <h1>{{ product.name }}</h1>
@@ -50,6 +53,8 @@ function add() {
             :aria-label="color.name" :aria-pressed="color.name === selected.color" @focus="preview = color.paint"
             @blur="preview = null" @mouseover="preview = color.paint" @mouseleave="preview = null" @click="pickColor(color.name)"></button>
         </div>
+        <ProductArt v-if="['shirt', 'tee', 'bag'].includes(product.shape) || product.id === 'quan-straight'"
+          class="color-preview" :shape="product.shape" :paint="preview ?? variant?.color.paint" />
         <p><strong>Size</strong> · {{ selected.size }}</p>
         <div class="filters">
           <button v-for="item in sizes" :key="item.id" :class="{ selected: item.size === selected.size }"
