@@ -21,7 +21,17 @@ Mở địa chỉ Vite in ra. Chạy `npm test` để kiểm thử và `npm run 
 4. Mở giỏ, tăng số lượng hoặc xóa dòng. Xóa hết sản phẩm trả tồn khả dụng về 3. Tải lại trang để kiểm tra giỏ hàng được lưu trên trình duyệt.
 5. Mở **Tư vấn phối đồ**, thử **Tìm túi dưới 300k** và bấm liên kết **Túi Canvas**.
 
-Tồn kho là dữ liệu mẫu. Số lượng trong giỏ chỉ giữ tồn trên trình duyệt hiện tại. Chatbot dùng quy tắc để tra giá, ưu đãi và tồn theo màu hoặc size, gợi ý trang phục trong ngân sách và hiểu câu hỏi tiếp nối về món vừa tư vấn. Ứng dụng demo chưa có đặt hàng, thanh toán hoặc cơ sở dữ liệu chung.
+Tồn kho là dữ liệu mẫu. Số lượng trong giỏ chỉ giữ tồn trên trình duyệt hiện tại. Ứng dụng demo chưa có đặt hàng, thanh toán hoặc cơ sở dữ liệu chung.
+
+## Bật chatbot OpenAI
+
+1. Tạo khóa trong [OpenAI Platform](https://platform.openai.com/api-keys) trên dự án có quyền gọi API.
+2. Sao chép `.env.example` thành `.env.local`, mở tệp mới và điền khóa vào `OPENAI_API_KEY`. Giữ tệp này trên máy hoặc dùng phần Secrets của dịch vụ lưu trữ backend.
+3. Khởi động lại `npm.cmd run dev`. Câu trả lời đi qua OpenAI có nhãn **OpenAI**. Khi API chưa được cấu hình hoặc gặp lỗi, chatbot hiển thị **Tra cứu danh mục** và dùng logic có sẵn.
+
+Máy chủ gửi tối đa tám tin nhắn gần nhất, danh mục và tồn khả dụng cho [OpenAI Responses API](https://developers.openai.com/api/reference/resources/responses/methods/create). Mô hình mặc định là `gpt-5.4-mini`. Đặt `OPENAI_MODEL` để chọn mô hình tương thích khác.
+
+GitHub Pages chỉ chạy giao diện tĩnh. Để bật OpenAI trên bản công khai, triển khai máy chủ Node 24 bằng `npm run start:chat` trên một dịch vụ có HTTPS. Đặt `OPENAI_API_KEY` trong Secrets của dịch vụ, đặt `CHAT_ALLOWED_ORIGIN=https://dragongod655.github.io`, rồi thêm biến GitHub Actions `VITE_CHAT_API_URL` trỏ tới địa chỉ HTTPS của backend kết thúc bằng `/api/chat`. Chạy lại workflow sau khi đặt biến. Máy chủ demo giới hạn 12 yêu cầu mỗi phút và 100 mỗi ngày trên mỗi tiến trình.
 
 ## Nguồn ảnh
 
