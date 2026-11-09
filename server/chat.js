@@ -18,7 +18,9 @@ const answerFormat = {
 }
 
 export function createChatHandler(env = process.env, fetchResponse = fetch) {
-  const key = env.OPENAI_API_KEY?.trim()
+  const geminiKey = env.GEMINI_API_KEY?.trim() ||
+    (env.OPENAI_API_KEY?.startsWith('AQ.') || env.OPENAI_API_KEY?.startsWith('AIza') ? env.OPENAI_API_KEY.trim() : null)
+  const openaiKey = env.OPENAI_API_KEY?.startsWith('sk-') ? env.OPENAI_API_KEY.trim() : (!geminiKey ? env.OPENAI_API_KEY?.trim() : null)
   const allowedOrigin = env.CHAT_ALLOWED_ORIGIN
   let minute = -1
   let day = -1
@@ -52,7 +54,7 @@ export function createChatHandler(env = process.env, fetchResponse = fetch) {
       return
     }
     if (req.method !== 'POST') return respond(405, { error: 'method_not_allowed' })
-    if (!key) return respond(503, { error: 'openai_not_configured' })
+    if (!geminiKey && !openaiKey) return respond(503, { error: 'ai_not_configured' })
 
     let body
     try {
@@ -103,9 +105,55 @@ export function createChatHandler(env = process.env, fetchResponse = fetch) {
     const currentProduct = products.some(product => product.id === body.currentProduct) ? body.currentProduct : null
 
     try {
+      if (geminiKey) {
+        const model = env.GEMINI_MODEL || 'gemini-3.6-flash'
+        const result = await fetchResponse(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+          method: 'POST',
+          headers: { 'x-goog-api-key': geminiKey, 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(16000),
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: `${instructions}\nDanh mục và trang hiện tại: ${JSON.stringify({ catalog, currentProduct })}` }],
+            },
+            contents: conversation.map(({ role, content }) => ({
+              role: role === 'assistant' ? 'model' : 'user',
+              parts: [{ text: content }],
+            })),
+            generationConfig: {
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: 'OBJECT',
+                properties: {
+                  text: { type: 'STRING' },
+                  productIds: {
+                    type: 'ARRAY',
+                    items: { type: 'STRING', enum: products.map(product => product.id) },
+                  },
+                },
+                required: ['text', 'productIds'],
+              },
+            },
+          }),
+        })
+        if (!result.ok) return respond(502, { error: 'gemini_unavailable' })
+        const response = await result.json()
+        const rawText = response.candidates?.[0]?.content?.parts
+          ?.filter(part => !part.thought).map(part => part.text ?? '').join('')
+        if (!rawText) return respond(502, { error: 'gemini_incomplete' })
+        const { text, productIds } = JSON.parse(rawText)
+        if (typeof text !== 'string' || !text.trim() || !Array.isArray(productIds)) {
+          return respond(502, { error: 'invalid_gemini_reply' })
+        }
+        return respond(200, {
+          text: text.slice(0, 1200),
+          productIds: [...new Set(productIds)].filter(id => products.some(product => product.id === id)).slice(0, 3),
+          provider: 'Gemini',
+        })
+      }
+
       const result = await fetchResponse('https://api.openai.com/v1/responses', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${openaiKey}`, 'Content-Type': 'application/json' },
         signal: AbortSignal.timeout(16000),
         body: JSON.stringify({
           model: env.OPENAI_MODEL || 'gpt-5.4-mini',
@@ -128,9 +176,10 @@ export function createChatHandler(env = process.env, fetchResponse = fetch) {
       return respond(200, {
         text: text.slice(0, 1200),
         productIds: [...new Set(productIds)].filter(id => products.some(product => product.id === id)).slice(0, 3),
+        provider: 'OpenAI',
       })
     } catch {
-      return respond(502, { error: 'openai_unavailable' })
+      return respond(502, { error: geminiKey ? 'gemini_unavailable' : 'openai_unavailable' })
     }
   }
 }

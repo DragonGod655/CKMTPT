@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import { createChatHandler } from './server/chat.js'
 
 export default defineConfig(({ mode }) => {
-  const env = { ...process.env, ...loadEnv(mode, process.cwd(), ['OPENAI_', 'CHAT_']) }
+  const env = { ...process.env, ...loadEnv(mode, process.cwd(), ['OPENAI_', 'GEMINI_', 'CHAT_']) }
   return {
     base: './',
     plugins: [vue(), {

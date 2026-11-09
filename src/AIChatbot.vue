@@ -17,7 +17,7 @@ const prompts = ['Phối đồ đi làm', 'Tìm túi dưới 300k', 'Sneaker siz
 const endpoint = import.meta.env.VITE_CHAT_API_URL || (import.meta.env.DEV ? '/api/chat' : '')
 let previousId
 
-async function askOpenAI() {
+async function askAI() {
   if (!endpoint) return null
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -32,9 +32,14 @@ async function askOpenAI() {
     }),
   })
   if (!response.ok) return null
-  const { text, productIds } = await response.json()
+  const { text, productIds, provider } = await response.json()
   if (!text || !Array.isArray(productIds)) return null
-  return { text, items: products.filter(product => productIds.includes(product.id)), openai: true }
+  return {
+    text,
+    items: products.filter(product => productIds.includes(product.id)),
+    provider: provider || 'AI',
+    ai: true,
+  }
 }
 
 async function toggle() {
@@ -52,7 +57,7 @@ async function send(text) {
   input.value = ''
   pending.value = true
   try {
-    const ai = await askOpenAI().catch(() => null)
+    const ai = await askAI().catch(() => null)
     const answer = ai ?? await getAdvice(question, cart.available, route.params.id ?? previousId)
     previousId = answer.items.length === 1 ? answer.items[0].id : undefined
     messages.value.push(answer)
@@ -74,7 +79,7 @@ async function send(text) {
         <p class="bubble">Chào bạn! Hỏi mình về phối đồ, ngân sách, giá ưu đãi hoặc tồn kho theo màu và size nhé.</p>
         <div v-for="(message, i) in messages" :key="i" class="bubble" :class="{ mine: message.user }">
           <p>{{ message.text }}</p>
-          <small v-if="!message.user">{{ message.openai ? 'OpenAI' : 'Tra cứu danh mục' }}</small>
+          <small v-if="!message.user && message.provider !== 'Gemini'">{{ message.provider || (message.openai ? 'OpenAI' : 'Tra cứu danh mục') }}</small>
           <RouterLink v-for="item in message.items ?? []" :key="item.id" :to="{ name: 'product', params: { id: item.id } }" @click="open = false">{{ item.name }} ↗</RouterLink>
         </div>
         <p v-if="pending" class="bubble">Mình đang xem danh mục…</p>

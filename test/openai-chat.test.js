@@ -41,6 +41,34 @@ test('sends catalog and conversation to OpenAI and filters returned product IDs'
   assert.deepEqual(result.productIds, ['ao-linen'])
 })
 
+test('sends catalog and conversation to Gemini and filters returned product IDs', async () => {
+  const handler = createChatHandler({ GEMINI_API_KEY: 'AQ.test-key' }, async (url, init) => {
+    assert.equal(url, 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent')
+    assert.equal(init.headers['x-goog-api-key'], 'AQ.test-key')
+    const request = JSON.parse(init.body)
+    assert.match(request.systemInstruction.parts[0].text, /"color":"Kem","size":"S","available":2/)
+    assert.deepEqual(request.contents.map(turn => turn.role), ['user', 'model', 'user'])
+    const text = JSON.stringify({ text: 'Sơ mi Linen màu Kem size S còn 2.', productIds: ['ao-linen', 'invalid'] })
+    return {
+      ok: true,
+      json: async () => ({
+        candidates: [{ content: { parts: [{ thought: true, text: 'internal' }, { text }] } }],
+      }),
+    }
+  })
+  const { status, result } = await send(handler, {
+    conversation: [
+      { role: 'user', content: 'Mình thích sơ mi.' },
+      { role: 'assistant', content: 'Bạn thử xem Sơ mi Linen.' },
+      { role: 'user', content: 'Còn màu kem size S không?' },
+    ],
+    reserved: { 'ao-linen:0-S': 1 },
+  })
+  assert.equal(status, 200)
+  assert.deepEqual(result.productIds, ['ao-linen'])
+  assert.equal(result.provider, 'Gemini')
+})
+
 test('returns a controlled response for missing credentials or a disallowed origin', async () => {
   const handler = createChatHandler({})
   assert.equal((await send(handler, {})).status, 503)
