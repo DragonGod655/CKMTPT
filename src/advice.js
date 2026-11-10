@@ -9,6 +9,8 @@ const aliases = {
 }
 const colors = [...new Set(products.flatMap(product => product.variants.map(variant => variant.color.name)))]
 
+export const shoppingOnlyReply = 'Xin lỗi, tôi chỉ có thể giải đáp các thắc mắc về mua sắm của bạn.'
+
 function getBudget(question) {
   const value = question.match(/\b(?:duoi|toi da|ngan sach|tam|khoang|khong qua)\s*[:=]?\s*(\d{1,3}(?:[., ]\d{3})+|\d+)(?:([.,]\d+))?\s*(trieu|tr|k|nghin|ngan|vnd|d)?\s*(\d{1,3})?/)
   if (!value) return Infinity
@@ -31,8 +33,8 @@ export async function getAdvice(input, available, previousId) {
   const question = normalize(input)
   const reply = (text, items = []) => ({ text, items })
 
-  if (words(question, 'don hang|thanh toan|giao hang|doi tra')) {
-    return reply('Mộc Studio là cửa hàng demo. Bạn có thể kiểm tra sản phẩm và số tiền trong giỏ hàng. Tính năng đặt hàng, giao hàng và đổi trả chưa được hỗ trợ.')
+  if (words(question, 'don hang|dat hang|mua the nao|cach mua|thanh toan|giao hang|doi tra')) {
+    return reply('Bạn có thể chọn Mua ngay ở trang sản phẩm hoặc chọn Đặt hàng trong giỏ. Đơn hàng mẫu được ghi nhận trên trình duyệt. Cửa hàng chưa xử lý thanh toán, giao hàng hoặc đổi trả thực tế.')
   }
 
   const outfit = words(question, 'phoi|di lam|di choi|di hoc|outfit|cong so')
@@ -46,6 +48,8 @@ export async function getAdvice(input, available, previousId) {
   const colorQuery = words(question, 'mau')
   const sizeQuery = words(question, 'size|kich co') || size
   const budget = getBudget(question)
+  const sunProtection = words(question, 'chong nang|che nang|bao ve da|giu da')
+    || words(question, 'nang dep|troi nang|ngay nang|nang gat') && words(question, 'mac|phoi|trang phuc')
 
   const exact = products.filter(product => question.includes(normalize(product.name)))
   const named = exact.length ? exact : products.filter(product =>
@@ -60,10 +64,10 @@ export async function getAdvice(input, available, previousId) {
     return reply('Bạn muốn kiểm tra món nào? Gửi mình tên sản phẩm và màu hoặc size bạn cần nhé.')
   }
 
-  if (!targets.length && !outfit && !stockQuery && !priceQuery && !saleQuery && !sizeQuery && !colorQuery && !color && !Number.isFinite(budget)) {
-    return reply(words(question, 'chao|hello|hi')
-      ? 'Chào bạn! Bạn muốn tìm món theo ngân sách, kiểm tra màu và size, hay phối đồ cho một dịp cụ thể?'
-      : 'Bạn cho mình biết tên món, dịp mặc hoặc ngân sách nhé. Ví dụ “Sneaker size 39 còn không?” hoặc “Phối đồ đi làm dưới 1,1 triệu”.')
+  if (!targets.length && !outfit && !sunProtection && !stockQuery && !priceQuery && !saleQuery && !sizeQuery && !colorQuery && !color && !Number.isFinite(budget)) {
+    return reply(words(question, 'chao|hello|hi|mua sam|quan ao|thoi trang|trang phuc|san pham|mac gi')
+      ? 'Bạn muốn tìm món theo ngân sách, kiểm tra màu và kích cỡ, hay phối đồ cho một dịp cụ thể?'
+      : shoppingOnlyReply)
   }
 
   const scoped = (outfit || !targets.length ? products : targets)
@@ -71,6 +75,17 @@ export async function getAdvice(input, available, previousId) {
   const selection = product => product.variants.filter(variant => (!color || variant.color.name === color) && (!size || variant.size === size))
   const availableItems = scoped.filter(product => selection(product).some(variant => available(product, variant) > 0))
   const budgetLabel = Number.isFinite(budget) ? ` trong ngân sách ${money(budget)}` : ''
+
+  if (sunProtection) {
+    const items = ['ao-linen', 'kinh-ram']
+      .map(id => products.find(product => product.id === id))
+      .filter(product => unitPrice(product) <= budget && selection(product).some(variant => available(product, variant) > 0))
+      .slice(0, 2)
+    const suggestion = items.length
+      ? ` Bạn có thể xem ${items.map(product => `${product.name} (${money(unitPrice(product))})`).join(' hoặc ')}.`
+      : ''
+    return reply('Trời nắng, bạn nên chọn áo dài tay thoáng và quần dài nhẹ để che tay chân. Nếu đi ngoài trời lâu, hãy chọn thêm mũ vành rộng để che mặt và gáy.' + suggestion, items)
+  }
 
   if (outfit) {
     const work = words(question, 'di lam|cong so')

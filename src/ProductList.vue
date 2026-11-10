@@ -19,7 +19,7 @@ const shown = computed(() => category.value === 'Tất cả' ? products : produc
       <RouterLink class="primary" :to="{ name: 'catalog' }">Khám phá bộ sưu tập <span aria-hidden="true">↗</span></RouterLink>
     </div>
     <div class="hero-art">
-      <span class="hero-note">01 / LINEN EDIT</span>
+      <span class="hero-note">01 / BỘ SƯU TẬP LINEN</span>
       <img :src="productPhoto(products[0])" alt="Ảnh minh họa sơ mi sáng màu trên móc" fetchpriority="high">
       <span class="hero-caption">SƠ MI LINEN · ẢNH MINH HỌA</span>
     </div>

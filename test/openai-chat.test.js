@@ -42,12 +42,15 @@ test('sends catalog and conversation to OpenAI and filters returned product IDs'
 })
 
 test('sends catalog and conversation to Gemini and filters returned product IDs', async () => {
+  let attempts = 0
   const handler = createChatHandler({ GEMINI_API_KEY: 'AQ.test-key' }, async (url, init) => {
+    attempts++
     assert.equal(url, 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent')
     assert.equal(init.headers['x-goog-api-key'], 'AQ.test-key')
     const request = JSON.parse(init.body)
     assert.match(request.systemInstruction.parts[0].text, /"color":"Kem","size":"S","available":2/)
     assert.deepEqual(request.contents.map(turn => turn.role), ['user', 'model', 'user'])
+    if (attempts === 1) return { ok: false, status: 503 }
     const text = JSON.stringify({ text: 'Sơ mi Linen màu Kem size S còn 2.', productIds: ['ao-linen', 'invalid'] })
     return {
       ok: true,
@@ -67,6 +70,7 @@ test('sends catalog and conversation to Gemini and filters returned product IDs'
   assert.equal(status, 200)
   assert.deepEqual(result.productIds, ['ao-linen'])
   assert.equal(result.provider, 'Gemini')
+  assert.equal(attempts, 2)
 })
 
 test('returns a controlled response for missing credentials or a disallowed origin', async () => {

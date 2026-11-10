@@ -32,6 +32,13 @@ watch(() => [props.id, selected.color, selected.size], () => { message.value = '
 function add() {
   if (variant.value && cart.add(product.value, variant.value)) message.value = 'Đã thêm vào giỏ hàng.'
 }
+
+function buy() {
+  if (variant.value && cart.add(product.value, variant.value)) {
+    message.value = ''
+    cart.checkoutOpen = true
+  }
+}
 </script>
 
 <template>
@@ -55,14 +62,17 @@ function add() {
         </div>
         <ProductArt v-if="['shirt', 'tee', 'bag'].includes(product.shape) || product.id === 'quan-straight'"
           class="color-preview" :shape="product.shape" :paint="preview ?? variant?.color.paint" />
-        <p><strong>Size</strong> · {{ selected.size }}</p>
+        <p><strong>Kích cỡ</strong> · {{ selected.size }}</p>
         <div class="filters">
           <button v-for="item in sizes" :key="item.id" :class="{ selected: item.size === selected.size }"
             :aria-pressed="item.size === selected.size" @click="selected.size = item.size">{{ item.size }}</button>
         </div>
         <p v-if="inStock" class="stock" role="status">Còn hàng · {{ stock }} sản phẩm</p>
         <p v-else class="stock sold" role="status">Hết hàng</p>
-        <button class="primary" :disabled="!inStock" @click="add">Thêm vào giỏ</button>
+        <div class="purchase-actions">
+          <button class="secondary" :disabled="!inStock" @click="add">Thêm vào giỏ</button>
+          <button class="primary" :disabled="!inStock" @click="buy">Mua ngay</button>
+        </div>
         <p role="status">{{ message }}</p>
       </div>
     </div>
